@@ -10,7 +10,7 @@ app.use(cors({
 }));
 
 //* Dotenv Setup
-require('dotenv').config({ path: "../.env" });
+require('dotenv').config({ path: "../.env" , quiet: true});
 
 //* Databse Setup
 const database = require('./models');
@@ -18,9 +18,9 @@ const database = require('./models');
 //* Server Startpoint
 database.sequelize.sync().then(() => {
     //TODO: App Start
-    app.listen(process.env.SERVER_PORT || 3010, () => {
+    app.listen(process.env.SERVER_PORT || 3011, () => {
         console.log("Server running");
     });
-}).catch((error: string) => {
+}).catch((error: any) => {
     console.log(error)
 })

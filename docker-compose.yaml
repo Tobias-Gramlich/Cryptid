@@ -1,0 +1,64 @@
+services:
+  cryptid-database:
+    image: mysql:9.6
+    container_name: cryptid-database
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_DOCKER_PORT}
+    volumes:
+      - cryptid-database_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - cryptid-network
+
+  cryptid-frontend:
+    build:
+      context: ./client
+      dockerfile: DOCKERFILE
+    container_name: cryptid-frontend
+    restart: unless-stopped
+    ports:
+      - ${FRONTEND_DOCKER_PORT}
+    environment:
+      FRONTEND_PORT: ${FRONTEND_PORT}
+    depends_on:
+      cryptid-backend:
+        condition: service_started
+    networks:
+      - cryptid-network
+  
+  cryptid-backend:
+    build: 
+      context: ./server
+      dockerfile: DOCKERFILE
+    container_name: cryptid-backend
+    restart: unless-stopped
+    ports:
+      - ${BACKEND_DOCKER_PORT}
+    depends_on:
+      cryptid-database:
+        condition: service_healthy
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - cryptid-network
+    
+networks:
+  cryptid-network:
+    driver: bridge
+  
+volumes:
+  cryptid-database_data:
