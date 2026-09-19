@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from "sequelize";
-import { sequelize } from ".";
+import { DataTypes, Model, type Sequelize, type Optional } from 'sequelize';
+const {sequelize}: {sequelize: Sequelize} = require('.') ;
 
 interface UserAttributes {
     id: string;
